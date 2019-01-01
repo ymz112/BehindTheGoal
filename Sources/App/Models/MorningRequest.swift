@@ -7,6 +7,7 @@
 import Foundation
 import Vapor
 
+
 final class MorningRequest: NSObject {
     var date: String
     var wakeUpHour: Int

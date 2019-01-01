@@ -1,7 +1,7 @@
 import Vapor
 import MongoSwift
-import SwiftyJSON
 import HTTP
+
 
 
 /// Register your application's routes here.
@@ -27,10 +27,9 @@ public func routes(_ router: Router) throws {
             let duplicateCheckDoc: Document = ["date": morningRequest.date, "userName": morningRequest.userName]
             let duplicateResult = try morningCollection.find(duplicateCheckDoc)
             let decoder = BSONDecoder()
-            var documentsJson: Array<JSON> = []
+            var documentsJson: Array<Any> = []
             for d in duplicateResult {
-                let json = try decoder.decode(JSON.self, from: d)
-                documentsJson.append(json)
+                documentsJson.append(d)
             }
             print("duplicate result length: \(documentsJson.count)")
             
@@ -56,17 +55,16 @@ public func routes(_ router: Router) throws {
         let query: Document = ["userName": userName]
         let documents = try morningCollection.find(query)
         let decoder = BSONDecoder()
-        var documentsJson: Array<JSON> = []
+        var documentsJson: Array<Any> = []
         var totalLieInTime = 0
         for d in documents {
-            let json = try decoder.decode(JSON.self, from: d)
-            totalLieInTime += json["lieInTime"].intValue
-            documentsJson.append(json)
+            totalLieInTime += Int("\(d["lieInTime"]!)")!
+            documentsJson.append(d)
         }
         let average = (totalLieInTime == 0 || documentsJson.count == 0) ? "N/A" : (Double(totalLieInTime)/Double(documentsJson.count)).description
         
         
-        return HTTPResponse(status: .ok, body: "{\n \"documents\": \(JSON(documentsJson)),\n \"averageLieInTime\": \(average)\n}")
+        return HTTPResponse(status: .ok, body: "{\n \"documents\": \(documentsJson),\n \"averageLieInTime\": \(average)\n}")
     }
     
     
@@ -122,12 +120,11 @@ public func routes(_ router: Router) throws {
         
         let documents = try collection.find(query)
         let decoder = BSONDecoder()
-        var documentsJson: Array<JSON> = []
+        var documentsJson: Array<Any> = []
         for d in documents {
-            let json = try decoder.decode(JSON.self, from: d)
-            documentsJson.append(json)
+            documentsJson.append(d)
         }
-        return HTTPResponse(status: .ok, body: "\(JSON(documentsJson))")
+        return HTTPResponse(status: .ok, body: "\(documentsJson)")
     }
     
     router.delete("document", String.parameter) { req -> HTTPResponse in
