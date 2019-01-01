@@ -4,6 +4,6 @@ build:
   languages:
     - 'https://github.com/vapor-community/heroku-buildpack'
   pre:
-    - apt-get update -y && apt-get update && apt-get install cmake3 libssl-dev libsasl2-dev -y && apt-get install libmongoc-1.0-0
+    - apt-get update -y && apt-get update && apt-get install cmake libssl-dev libsasl2-dev -y && apt-get install libmongoc-1.0-0
 run:
   web: swift run serve
