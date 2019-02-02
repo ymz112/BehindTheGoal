@@ -1,7 +1,7 @@
 //
 //  StrUtil.swift
 //
-//  Created by 阳铭之 on 2018/12/29.
+//  Created by Mingzhi Yang on 2018/12/29.
 //
 
 import Foundation

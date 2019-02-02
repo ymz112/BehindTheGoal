@@ -2,7 +2,7 @@
 //  GoalRequest
 //  App
 //
-//  Created by 阳铭之 on 2018/12/15.
+//  Created by ymz on 2018/12/15.
 //
 
 import Foundation

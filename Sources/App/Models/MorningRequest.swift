@@ -1,7 +1,7 @@
 //
 //  MorningRequest.swift
 //
-//  Created by 阳铭之 on 2018/12/20.
+//  Created by Mingzhi Yang on 2018/12/20.
 //
 
 import Foundation
