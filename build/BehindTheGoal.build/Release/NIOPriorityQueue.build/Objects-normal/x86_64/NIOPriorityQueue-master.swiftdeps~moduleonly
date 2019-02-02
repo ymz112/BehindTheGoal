@@ -1,0 +1,6 @@
+version: "Apple Swift version 4.2.1 (swiftlang-1000.11.42 clang-1000.11.45.1)"
+options: "95c7a1378e32e9013608183f3efc3902"
+build_time: [1546361484, 77788000]
+inputs:
+  "/Users/yangmingzhi/Coding/GoalDen/BehindTheGoal/.build/checkouts/swift-nio.git-3108475404973543938/Sources/NIOPriorityQueue/Heap.swift": [9223372036, 854775807]
+  "/Users/yangmingzhi/Coding/GoalDen/BehindTheGoal/.build/checkouts/swift-nio.git-3108475404973543938/Sources/NIOPriorityQueue/PriorityQueue.swift": [9223372036, 854775807]

@@ -1,5 +1,7 @@
 setup:
-  config: {}
+  config: {
+    S3_BUCKET: my-example-bucket
+  }
 build:
   languages:
     - 'https://github.com/vapor-community/heroku-buildpack'

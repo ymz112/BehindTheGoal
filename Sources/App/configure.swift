@@ -5,6 +5,7 @@ import Vapor
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     /// Register providers first
     try services.register(FluentSQLiteProvider())
+    
 
     /// Register routes to the router
     let router = EngineRouter.default()
@@ -29,5 +30,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     var migrations = MigrationConfig()
     migrations.add(model: Todo.self, database: .sqlite)
     services.register(migrations)
+    
+    let configuration = URLSessionConfiguration.default
+    configuration.httpMaximumConnectionsPerHost = 10 // change the number according to need
 
 }

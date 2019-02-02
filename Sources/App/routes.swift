@@ -9,7 +9,8 @@ public func routes(_ router: Router) throws {
     // initialize global state
     MongoSwift.initialize()
     
-    let client = try MongoClient(connectionString: "mongodb://Goalden:Goalden123@goalden-shard-00-00-etr2n.mongodb.net:27017,goalden-shard-00-01-etr2n.mongodb.net:27017,goalden-shard-00-02-etr2n.mongodb.net:27017/test?ssl=true&replicaSet=Goalden-shard-0&authSource=admin&retryWrites=true")
+    // Connect to the database
+    let client = try MongoClient(connectionString: "Your DataBase Connection String")
     let db = try client.db("myDB")
     // Goal Database
     let collection = try db.collection("myCollection")
@@ -20,9 +21,6 @@ public func routes(_ router: Router) throws {
     router.post("newMorning") { req -> Future<HTTPResponse> in
         
         return try req.content.decode(MorningRequest.self).map(to: HTTPResponse.self) { morningRequest in
-            print("Date: \(morningRequest.date)")
-            print("UserName: \(morningRequest.userName)")
-            print("\(morningRequest.description)")
             
             let duplicateCheckDoc: Document = ["date": morningRequest.date, "userName": morningRequest.userName]
             let duplicateResult = try morningCollection.find(duplicateCheckDoc)
@@ -31,21 +29,19 @@ public func routes(_ router: Router) throws {
             for d in duplicateResult {
                 documentsJson.append(d)
             }
-            print("duplicate result length: \(documentsJson.count)")
             
             if(documentsJson.count == 0) {
                 let doc: Document = ["date": morningRequest.date, "userName": morningRequest.userName, "wakeUpHour": morningRequest.wakeUpHour.getDoubleDigitString(),
                                      "wakeUpMinute": morningRequest.wakeUpMinute.getDoubleDigitString(), "getUpHour": morningRequest.getUpHour.getDoubleDigitString(), "getUpMinute": morningRequest.getUpMinute.getDoubleDigitString(), "lieInTime": morningRequest.lieInTime.getDoubleDigitString()]
     
                 let result = try morningCollection.insertOne(doc)
-                print(result?.insertedId ?? "")
-                return HTTPResponse(status: .ok, body: "Insert new morning successful!")
+                return HTTPResponse(status: .ok, body: "{msg: \"Insert Morning successful!\", result: true}")
+            } else {
+                try morningCollection.updateOne(filter: ["date": morningRequest.date, "userName": morningRequest.userName], update: ["$set": ["wakeUpHour": morningRequest.wakeUpHour.getDoubleDigitString(),
+                                                                                                                                              "wakeUpMinute": morningRequest.wakeUpMinute.getDoubleDigitString(), "getUpHour": morningRequest.getUpHour.getDoubleDigitString(), "getUpMinute": morningRequest.getUpMinute.getDoubleDigitString(), "lieInTime": morningRequest.lieInTime.getDoubleDigitString()] as Document])
             }
             
-            try morningCollection.updateOne(filter: ["date": morningRequest.date, "userName": morningRequest.userName], update: ["$set": ["wakeUpHour": morningRequest.wakeUpHour.getDoubleDigitString(),
-                                                                                                                                          "wakeUpMinute": morningRequest.wakeUpMinute.getDoubleDigitString(), "getUpHour": morningRequest.getUpHour.getDoubleDigitString(), "getUpMinute": morningRequest.getUpMinute.getDoubleDigitString(), "lieInTime": morningRequest.lieInTime.getDoubleDigitString()] as Document])
-            
-            return HTTPResponse(status: .ok, body: "Update successful!")
+            return HTTPResponse(status: .ok, body: "{msg: \"Update successful!\", result: true}")
         }
     }
     
@@ -83,7 +79,6 @@ public func routes(_ router: Router) throws {
     router.get("insert") { req -> String in
         let doc: Document = ["_id": 100, "a": 1, "b": 2, "c": 3]
         let result = try collection.insertOne(doc)
-        print(result?.insertedId ?? "") // prints `100`
         return "Insert something!"
     }
     
@@ -92,25 +87,26 @@ public func routes(_ router: Router) throws {
         return "requested id #\(id)"
     }
     
-//    router.get("goals") { req -> Goal in
-//        return Goal(name: "Study", createdAt: "123", isFulfilled: false)
-//    }
     
     router.post("updateGoalName") { req -> Future<HTTPResponse> in
         
         return try req.content.decode(GoalRequest.self).map(to: HTTPResponse.self) { goalRequest in
             try collection.updateOne(filter: ["_id": goalRequest._id], update: ["$set": ["name": goalRequest.name] as Document])
             
-            return HTTPResponse(status: .ok, body: "Update successful!")
+            return HTTPResponse(status: .ok, body: "{msg: \"Update successful!\", result: true}")
         }
     }
     
     router.post("updateGoalIsFulfilled") { req -> Future<HTTPResponse> in
         
         return try req.content.decode(GoalRequest.self).map(to: HTTPResponse.self) { goalRequest in
-            try collection.updateOne(filter: ["_id": goalRequest._id], update: ["$set": ["isFulfilled": goalRequest.isFulfilled] as Document])
-            
-            return HTTPResponse(status: .ok, body: "Update successful!")
+            if(goalRequest.finishDate != nil && goalRequest.finishDate! != "" && goalRequest.isFulfilled == true) {
+                try collection.updateOne(filter: ["_id": goalRequest._id], update: ["$set": ["isFulfilled": goalRequest.isFulfilled, "finishDate": goalRequest.finishDate ] as Document])
+            } else {
+                try collection.updateOne(filter: ["_id": goalRequest._id], update: ["$set": ["isFulfilled": goalRequest.isFulfilled, "finishDate": ""] as Document])
+            }
+
+            return HTTPResponse(status: .ok, body: "{ \"msg\": \"Update successful!\", \"result\": true}")
         }
     }
     
@@ -131,38 +127,18 @@ public func routes(_ router: Router) throws {
         let _id = try req.parameters.next(String.self)
         let query: Document = ["_id": _id]
         let documents = try collection.deleteOne(query)
-        return HTTPResponse(status: .ok, body: "Delete Success!")
+        return HTTPResponse(status: .ok, body: "{msg: \"Delete successful!\", result: true}")
     }
-    
-//    func getGoalsByUser(userName: String) {
-//        let query: Document = ["userName": userName]
-//        let documents = try collection.find(query)
-//        for d in documents {
-//            print(d)
-//        }
-//    }
     
     router.post("addGoal") { req -> Future<HTTPResponse> in
         
         return try req.content.decode(GoalRequest.self).map(to: HTTPResponse.self) { goalRequest in
-            print("Name: \(goalRequest.name)")
-            print("Type of isFulfilled: \(type(of: goalRequest.isFulfilled) )")
-            let doc: Document = ["_id":goalRequest._id, "name": goalRequest.name, "date": goalRequest.date, "isFulfilled": goalRequest.isFulfilled, "userName": goalRequest.userName]
+            let doc: Document = ["_id":goalRequest._id, "name": goalRequest.name, "date": goalRequest.date, "isFulfilled": goalRequest.isFulfilled, "userName": goalRequest.userName, "category": goalRequest.category]
             let result = try collection.insertOne(doc)
-            print(result?.insertedId ?? "")
-
-
-            return HTTPResponse(status: .ok, body: "Insert successful!")
+            return HTTPResponse(status: .ok, body: "{msg: \"Insert successful!\", result: true}")
         }
     }
     
-    
-
-    // Example of configuring a controller
-    let todoController = TodoController()
-    router.get("todos", use: todoController.index)
-    router.post("todos", use: todoController.create)
-    router.delete("todos", Todo.parameter, use: todoController.delete)
 }
 
 

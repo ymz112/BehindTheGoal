@@ -1,0 +1,6 @@
+version: "Apple Swift version 4.2.1 (swiftlang-1000.11.42 clang-1000.11.45.1)"
+options: "1cbc8c1914c61a9a3462e55dbf521229"
+build_time: [1546361488, 893118000]
+inputs:
+  "/Users/yangmingzhi/Coding/GoalDen/BehindTheGoal/.build/checkouts/swift-nio.git-3108475404973543938/Sources/NIOConcurrencyHelpers/atomics.swift": [9223372036, 854775807]
+  "/Users/yangmingzhi/Coding/GoalDen/BehindTheGoal/.build/checkouts/swift-nio.git-3108475404973543938/Sources/NIOConcurrencyHelpers/lock.swift": [9223372036, 854775807]
